@@ -1,0 +1,28 @@
+﻿@model WebApplication8.Models.PaymentResultViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>TransactionResult</title>
+    <script src="~/lib/Barclays.js"></script>
+</head>
+<body>
+    <div>
+        <h2>@Model.StatusName</h2>
+
+        <script type="text/javascript">
+            ShowTransactionResult({
+                status: '@Model.Status',
+                statusName: '@Model.StatusName',
+                alias: '@Model.Alias',
+                cardNumber: '@Model.CardNumber',
+                expiryDate: '@Model.ExpiryDate',
+                cardholderName: '@Model.CardholderName'
+            });
+        </script>
+    </div>
+</body>
+</html>

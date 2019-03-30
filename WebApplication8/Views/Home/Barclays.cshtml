@@ -1,0 +1,118 @@
+﻿
+@{
+    ViewBag.Title = "Barclays";
+}
+
+<h2>Barclays</h2>
+
+<div class="container" ng-app="myApp">
+    <div class="row" ng-controller="myCtrl as bla">
+        <div class="col-lg-3">
+            <form id="OrderForm" action="https://mdepayments.epdq.co.uk/ncol/test/orderstandard_utf8.asp" method="post" target="paymentFrame">
+                <div class="form-group">
+                    <label for="AMOUNT">Amount</label>
+                    <input type="text" name="AMOUNT" class="form-control" ng-model="bla.data.PaymentAmount" />
+                </div>
+                <div class="form-group">
+                    <label for="CURRENCY">Currency</label>
+                    <input type="text" name="CURRENCY" class="form-control" ng-model="bla.data.Currency" />
+                </div>
+                <div class="form-group">
+                    <label for="LANGUAGE">Language</label>
+                    <input type="text" name="LANGUAGE" class="form-control" ng-model="bla.data.Language" />
+                </div>
+                <div class="form-group">
+                    <label for="LOGO">Logo</label>
+                    <input type="text" name="LOGO" class="form-control" ng-model="bla.data.Logo" />
+                </div>
+                <div class="form-group">
+                    <label for="ORDERID">OrderId</label>
+                    <input type="text" name="ORDERID" class="form-control" ng-model="bla.data.OrderId" />
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" ng-model="bla.useAlias">
+                    <label class="form-check-label" for="exampleCheck1">Use Alias</label>
+                </div>
+                <div class="form-group">
+                    <label for="ALIAS">Alias</label>
+                    <input ng-disabled="!bla.useAlias" type="text" name="ALIAS" class="form-control" ng-model="bla.data.Alias" />
+                </div>
+                <div class="form-group">
+                    <label for="ALIASUSAGE">AliasUsage</label>
+                    <input ng-disabled="!bla.useAlias" type="text" name="ALIASUSAGE" class="form-control" ng-model="bla.data.AliasUsage" />
+                </div>
+                <div class="form-group">
+                    <label for="PSPID">PSIPD</label>
+                    <input type="text" name="PSPID" class="form-control" ng-model="bla.data.PSIPD" />
+                </div>
+                <div class="form-group">
+                    <label for="SHASign">SHASign</label>
+                    <input type="text" name="SHASign" class="form-control" ng-model="bla.data.SHASign" />
+                </div>
+                <div class="form-group">
+                    <label for="ACCEPTURL">Return URL</label>
+                    <input type="text" class="form-control" name="ACCEPTURL" ng-model="bla.data.ReturnUrl" />
+                    <input type="text" style="display: none" name="DECLINEURL" ng-model="bla.data.ReturnUrl" />
+                    <input type="text" style="display: none" name="EXCEPTIONURL" ng-model="bla.data.ReturnUrl" />
+                    <input type="text" style="display: none" name="CANCELURL" ng-model="bla.data.ReturnUrl" />
+                </div>
+                <input type="button" value="Get SHA" class="btn btn-info" ng-click="bla.GetSha()" />
+                <input type="button" value="Go To Payment" class="btn btn-primary" ng-click="bla.Submit()" />
+            </form>
+        </div>
+        <div class="col-lg-9">
+            <iframe id="PaymentFrame" style="width: 100%; height: 600px; border-width: 0" name="paymentFrame"></iframe>
+            <div class="form-group">
+                <label for="TransactionResult">Transaction Result</label>
+                <input id="TransactionStatus" class="form-control" type="text" />
+                <input id="TransactionStatusName" class="form-control" type="text" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var app = angular.module('myApp', []);
+    app.controller('myCtrl', function ($http) {
+
+        var payment = this;
+        payment.useAlias = true;
+        payment.data =
+            {
+                OrderId: 'ORD1234579XYZ',
+                PaymentAmount: '200',
+                Currency: 'GBP',
+                Language: 'en_GB',
+                Logo: 'https://www.ctinsuretech.com/static/assets/images/charles-taylor-insure-tech.svg',
+                PSIPD: 'ctinsuretech',
+                Alias: 'superalias',
+                AliasUsage: 'Smartix wants your alias',
+                ReturnUrl: 'https://localhost:44383/PaymentResult'
+            };
+
+        payment.GetSha = function () {
+            var dataToSubmit = angular.copy(payment.data);
+            if (!payment.useAlias) {
+                console.log(payment.useAlias);
+                dataToSubmit.Alias = "";
+                dataToSubmit.AliasUsage = "";
+            }
+
+            $http.post('/api/payments', dataToSubmit).then(
+                function successCallback(response) {
+                    payment.data.SHASign = response.data;
+                },
+                function errorCallback(response) {
+                    console.log('Unable to get SHA');
+                    console.log(response);
+                });
+        };
+
+        payment.Submit = function () {
+            document.getElementById('OrderForm').submit();
+        };
+
+        payment.GetSha();
+    });
+</script>
